@@ -1,0 +1,21 @@
+# summary
+
+spring boot, webflux, kotlin, mongodb
+
+### design
+
+- products are copied into orders so no later product changes affect
+existing orders
+- (re)computing order price is trivial based on all the products
+it contains (added function for convenience)
+
+### run
+
+production spring boot env variables are needed (like mongodb url)
+
+### ignored things
+
+- pagination
+- time offset storing and computing
+- limiting number of products in a single order
+- unbounded search for orders
