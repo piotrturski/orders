@@ -1,5 +1,8 @@
 package net.piotrturski.shop.order
 
+import io.swagger.annotations.ApiModelProperty
+import io.swagger.annotations.ApiResponse
+import io.swagger.annotations.ApiResponses
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus.CREATED
@@ -42,6 +45,9 @@ class OrderController(val productRepository: ProductRepository, val orderReposit
                 .flatMap{orderRepository.save(it)}
     }
 
+    @ApiResponses(value = arrayOf(
+        ApiResponse(responseContainer = "List", response = Order::class, code = 200, message = "")
+    ))
     @GetMapping
     fun get(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) start: LocalDateTime,

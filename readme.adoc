@@ -1,6 +1,6 @@
 # summary
 
-spring boot, webflux, kotlin, mongodb
+spring boot, kotlin, mongodb
 
 ### design
 
