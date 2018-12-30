@@ -59,15 +59,30 @@ dependencies {
 
 	implementation("io.springfox:springfox-swagger-ui:2.9.2")
 	implementation("io.springfox:springfox-swagger2:2.9.2")
+	implementation "org.hibernate.validator:hibernate-validator"
+
+//	implementation 'cz.jirutka.spring:spring-rest-exception-handler:1.2.0'
 //	runtimeOnly('org.postgresql:postgresql')
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('io.projectreactor:reactor-test')
+
 //	testImplementation('org.springframework.restdocs:spring-restdocs-mockmvc')
+	testImplementation 'com.googlecode.zohhak:zohhak:1.1.1'
+
+	testImplementation platform('org.junit:junit-bom:5.3.2')
+
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+//	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+	testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
 }
 
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+test {
+	useJUnitPlatform()
 }

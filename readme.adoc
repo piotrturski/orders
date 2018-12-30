@@ -19,3 +19,20 @@ production spring boot env variables are needed (like mongodb url)
 - time offset storing and computing
 - limiting number of products in a single order
 - unbounded search for orders
+
+### TODO
+
+* [x] validation
+* [x] junit 5 + vintage
+* [ ] jasmine like tests
+* [ ] parameterized tests (maybe kotlin test)
+* [ ] java 9 modules, exports
+* [ ] springfox / swagger
+* [ ] spring doc
+* [ ] check swagger for webflux
+* [ ] maybe java LTS
+* [ ] hystrix
+* [ ] circleCI
+* [ ] sonar
+* [ ] coverage
+* [ ] badges
