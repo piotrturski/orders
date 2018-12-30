@@ -43,8 +43,9 @@ repositories {
 	maven { url "https://repo.spring.io/milestone" }
 }
 
-sourceSets.main.java.srcDirs = ['src/main/kotlin']
-sourceSets.test.java.srcDirs = ['src/test/kotlin']
+
+//sourceSets.main.java.srcDirs = ['src/main/kotlin']
+//sourceSets.test.java.srcDirs = ['src/test/kotlin']
 
 ext['springCloudVersion'] = 'Greenwich.M3'
 
