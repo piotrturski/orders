@@ -79,7 +79,7 @@ class ProductController(val productRepository: ProductRepository) {
 
 data class Product(val id: String?, val price: BigDecimal, val name:String) {
     init {
-        Preconditions.checkArgument(price > BigDecimal.ZERO, "price must be positive")
+        Preconditions.checkArgument(price > JavaSrc.ZERO, "price must be positive")
         Preconditions.checkArgument(name.isNotBlank(), "name must not be blank")
     }
 }
