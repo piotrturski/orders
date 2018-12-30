@@ -1,4 +1,5 @@
 .*
 !/.gitignore
+!/.circleci
 /build
 /out
