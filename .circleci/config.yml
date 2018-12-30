@@ -26,4 +26,19 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
+      - run:
+          name: Run memory monitor daemon
+          command: while true; do ps -u circleci eo pid,%cpu,%mem,vsize,rss,uname,args --sort=-rss >> ./memory-usage.txt; echo "----------" >> ./memory-usage.txt; sleep 1; done
+          background: true
+
+
       - run: ./gradlew --info test
+
+      - store_test_results:
+          path: build/test-results/test
+      - store_artifacts:
+          path: build/reports/tests
+          destination: tests
+      - store_artifacts:
+          path: ./memory-usage.txt  #circleCI doesn't resolve env vars in yml commands
+          destination: memory-usage.txt
