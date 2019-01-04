@@ -28,6 +28,7 @@ production spring boot env variables are needed (like mongodb url)
 * [x] jasmine like tests
 * [x] parameterized tests (maybe kotlin test)
 * [ ] java 9 modules, exports
+* [ ] check if switching to webflux works
 * [ ] springfox / swagger
 * [ ] spring doc
 * [ ] check swagger for webflux
