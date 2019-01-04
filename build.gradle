@@ -2,6 +2,7 @@ buildscript {
 	ext {
 		kotlinVersion = '1.2.71'
 		springBootVersion = '2.1.1.RELEASE'
+		spek1Version = '1.2.1'
 	}
 	repositories {
 		mavenCentral()
@@ -41,11 +42,8 @@ compileTestKotlin {
 repositories {
 	mavenCentral()
 	maven { url "https://repo.spring.io/milestone" }
+	jcenter()
 }
-
-
-//sourceSets.main.java.srcDirs = ['src/main/kotlin']
-//sourceSets.test.java.srcDirs = ['src/test/kotlin']
 
 ext['springCloudVersion'] = 'Greenwich.M3'
 
@@ -80,6 +78,14 @@ dependencies {
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 	testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+
+	testCompile ("org.jetbrains.spek:spek-api:$spek1Version") {
+		exclude group: 'org.jetbrains.kotlin'
+	}
+	testRuntime ("org.jetbrains.spek:spek-junit-platform-engine:$spek1Version") {
+		exclude group: 'org.junit.platform'
+		exclude group: 'org.jetbrains.kotlin'
+	}
 }
 
 dependencyManagement {
@@ -91,12 +97,3 @@ dependencyManagement {
 test {
 	useJUnitPlatform()
 }
-
-//sourceSets {
-//	test.java.srcDirs = []
-//	test.kotlin.srcDirs = ['test/main/java', 'test/main/kotlin']
-
-//	main.java.srcDirs = []
-//	main.kotlin.srcDirs = ['src/main/java', 'src/main/kotlin']
-//	main.resources.srcDirs = ['src/main/resources']
-//}

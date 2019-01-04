@@ -25,8 +25,8 @@ production spring boot env variables are needed (like mongodb url)
 * [x] validation
 * [x] kotlin and java files in the same src dir. cross compilation
 * [x] junit 5 + vintage
-* [ ] jasmine like tests
-* [ ] parameterized tests (maybe kotlin test)
+* [x] jasmine like tests
+* [x] parameterized tests (maybe kotlin test)
 * [ ] java 9 modules, exports
 * [ ] springfox / swagger
 * [ ] spring doc
