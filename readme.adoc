@@ -32,7 +32,7 @@ production spring boot env variables are needed (like mongodb url)
 * [ ] springfox / swagger
 * [ ] spring doc
 * [ ] check swagger for webflux
-* [ ] maybe java LTS
+* [x] maybe java LTS
 * [ ] hystrix
 * [x] circleCI
 * [ ] sonar
