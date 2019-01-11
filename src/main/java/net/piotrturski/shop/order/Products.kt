@@ -57,24 +57,6 @@ class ProductController(val productRepository: ProductRepository) {
         return productRepository.findAll()
     }
 
-    @ExceptionHandler
-    @ResponseStatus(UNPROCESSABLE_ENTITY)
-    fun validationError(e: MethodArgumentNotValidException): Any {
-        return e.bindingResult.fieldErrors.stream()
-                .map { err -> ImmutableMap.of("field", err.field, "error", err.defaultMessage!!) }
-                .toArray()
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(BAD_REQUEST)
-    fun parsingError(e: HttpMessageNotReadableException): Any {
-        return ImmutableMap.of<String, Any>("sample message", "{}")
-    }
-
-//    @ExceptionHandler
-//    @ResponseStatus(INTERNAL_SERVER_ERROR)
-//    fun a(exc: Exception) {}
-
 }
 
 data class Product(val id: String?, val price: BigDecimal, val name:String) {

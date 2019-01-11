@@ -1,12 +1,9 @@
 package net.piotrturski.shop.order
 
-import com.googlecode.zohhak.api.Coercion
-import com.googlecode.zohhak.api.TestWith
-import com.jayway.jsonpath.JsonPath
-import net.piotrturski.shop.order.Util.noForward
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.matcher.AssertionMatcher
-import org.hamcrest.core.StringContains
+import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,20 +17,12 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.RequestBuilder
-import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.ResultMatcher
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
@@ -213,83 +202,56 @@ class ProductMvc {
     }
 }
 
+class ValidationSpek: Spek({
 
-class Manual {
+    describe("product controller") {
 
-    lateinit var mockMvc: MockMvc
-    val productRepository: ProductRepository = mock(ProductRepository::class.java)
+        val productRepository: ProductRepository = mock(ProductRepository::class.java)
+
+        val productController = ProductController(productRepository)
+        val mockMvc = restMockMvc(productController)
 
 
-    @Before
-    fun before() {
-
-//        val url : String? = null
-//        val matcher: ResultMatcher = MockMvcResultMatchers.forwardedUrl(null as String?)
-        mockMvc = MockMvcBuilders.standaloneSetup(ProductController(productRepository), ExceptionMapper())
-        .alwaysExpect<StandaloneMockMvcBuilder>(noForward)
-//                .setHandlerExceptionResolvers(DefaultHandlerExceptionResolver())
-//                .setMessageConverters(MappingJackson2HttpMessageConverter())
-                .build()
-    }
-
-//    @TestWith(
-//            """-3, a name, price positive""",
-//            """ " " ,  """
-//    )
-    //TODO parameterized testing
-    @Test
-    fun `should return client error on bad input`(
-//        price: String, name: String, errorTxts: List<String>
-) {
-        val result = mockMvc.perform(post("/products").jsonContent("""
-            {
-                "price": -3,
-                "name":"dsd"
-            }
-        """)
+        listOf(
+//            """{"price": -3, "name":"dsd"}""", "price", "must be greater than 1",
+            """{"price": -3, "name":""}""",
+            """{"price": -3, "name":"", "sdfs":"sdfs"}""",
+            """{"price": -3, "name":" "}"""//, "name", "must not be blank"
+//            """{"price": null, "name":""}""", "name", "must not be blank",
+//            """{"price": -3, "name":""}""", "name", "must not be blank1"
         )
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isUnprocessableEntity)
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(jsonPath("[?(@.field=='price')].error")
-                    { assertThat(it as List<String>).containsExactly("must be greater than 0")})
-    }
+            .forEach {
 
-    @Coercion
-    private fun d() {
+                it("should return 4xx for json '$it'") {
 
-    }
-
-    private fun jsonPath(path: String, block: (Any) -> Unit): ResultMatcher {
-        return jsonPath(path, object : AssertionMatcher<Any>() {
-            override fun assertion(actual: Any) {
-                block(actual)
+                    mockMvc.perform(post("/products").jsonContent(it))
+                            .andExpect(status().isUnprocessableEntity)
+                            .andExpect(content().json("""
+                                [
+                                    {"field":"price","error":"must be greater than 0"},
+                                    {"field":"name","error":"must not be blank"}
+                                ]"""))
+                }
             }
-        })
+
+        listOf(
+                """{"price": null, "name":"a"}""",
+                """{"pric""",
+                """{"price": 3, "name":null}"""
+        )
+                .forEach {
+
+                    it("should return 4xx for json: $it") {
+
+                        mockMvc.perform(post("/products").jsonContent(it))
+                                .andExpect(status().isBadRequest)
+                    }
+
+                }
+
+
+//        """[{"field":"price","error":"must be greater than 0"},{"field":"name","error":"must not be blank"}]"""
     }
 
-}
+})
 
-class A {
-
-    @Test
-    fun jsonpath() {
-        val read = JsonPath.parse("""[{"field":"price", "error":"a text"}]""")
-                .read<Any>("[?(@.field=='price')].error")
-//                .read<Any>(""".[field = 'price'].error""")
-        println(read)
-    }
-
-}
-
-/**
- * performs async request. allows adding expectation for async result
- */
-fun MockMvc.exchange(builder: RequestBuilder): ResultActions {
-    val perform = this.perform(builder)
-    return perform
-            .andReturn().run { this@exchange.perform(asyncDispatch(this)) }
-}
-
-fun MockHttpServletRequestBuilder.jsonContent(content: String) =
-        this.contentType(MediaType.APPLICATION_JSON_UTF8).content(content)
