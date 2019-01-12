@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
 
@@ -38,7 +39,7 @@ fun jsonPath(path: String, block: (Any) -> Unit): ResultMatcher {
 fun restMockMvc(vararg controllers: Any): MockMvc {
     return MockMvcBuilders.standaloneSetup(*controllers, ExceptionMapper())
             .alwaysDo<StandaloneMockMvcBuilder>(MockMvcResultHandlers.print())
-            .alwaysExpect<StandaloneMockMvcBuilder>(Util.noForward)
+            .alwaysExpect<StandaloneMockMvcBuilder>(forwardedUrl(null))
             .alwaysExpect<StandaloneMockMvcBuilder>(content().contentTypeCompatibleWith(APPLICATION_JSON_UTF8))
 //                .setHandlerExceptionResolvers(DefaultHandlerExceptionResolver())
 //                .setMessageConverters(MappingJackson2HttpMessageConverter())

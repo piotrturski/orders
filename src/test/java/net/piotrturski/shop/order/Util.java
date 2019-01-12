@@ -24,6 +24,4 @@ public class Util {
         }
     }
 
-    static public final ResultMatcher noForward = MockMvcResultMatchers.forwardedUrl(null);
-
 }

@@ -15,6 +15,9 @@ buildscript {
 	}
 }
 
+
+ext['spring.version'] = '5.1.4.RELEASE'
+
 //apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
