@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.NO_CONTENT
-import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,20 +16,10 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.math.BigDecimal
-import com.google.common.collect.ImmutableMap
-import org.springframework.validation.BindingResultUtils.getBindingResult
-import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
-import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.validation.annotation.Validated
-import java.lang.Exception
+import net.piotrturski.infra.JavaInterop
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Positive
-
 
 @RestController
 @RequestMapping("/products")
@@ -39,29 +28,22 @@ class ProductController(val productRepository: ProductRepository) {
 
     @PostMapping
     @ResponseStatus(CREATED)
-//    @Validated
-    fun insert(
-            @Valid
-            @RequestBody product: ProductBody): Mono<Product> {
-        return productRepository.insert(product.toProductWithId(null))
-    }
+    fun insert(@Valid @RequestBody product: ProductBody): Mono<Product> =
+            productRepository.insert(product.toProductWithId(null))
 
     @PutMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    fun update(@PathVariable id:String, @Valid @RequestBody product: ProductBody): Mono<Void> {
-        return productRepository.save(product.toProductWithId(id)).then()
-    }
+    fun update(@PathVariable id:String, @Valid @RequestBody product: ProductBody): Mono<Void> =
+            productRepository.save(product.toProductWithId(id)).then()
 
     @GetMapping
-    fun get(): Flux<Product> {
-        return productRepository.findAll()
-    }
+    fun get(): Flux<Product> = productRepository.findAll()
 
 }
 
 data class Product(val id: String?, val price: BigDecimal, val name:String) {
     init {
-        Preconditions.checkArgument(price > JavaSrc.ZERO, "price must be positive")
+        Preconditions.checkArgument(price > BigDecimal.ZERO, "price must be positive")
         Preconditions.checkArgument(name.isNotBlank(), "name must not be blank")
     }
 }

@@ -59,7 +59,9 @@ internal class ExceptionMapper {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun a(exc: java.lang.Exception) {}
+    fun a(exc: java.lang.Exception) {
+        log().error("unhandled ",exc)
+    }
 
 
 }

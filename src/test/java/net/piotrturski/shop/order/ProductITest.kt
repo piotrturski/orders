@@ -1,32 +1,44 @@
 package net.piotrturski.shop.order
 
+import com.google.common.collect.Lists
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.groups.Tuple
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.BDDMockito
 import org.mockito.BDDMockito.given
 import org.mockito.BDDMockito.mock
+import org.mockito.BDDMockito.reset
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpMethod.PUT
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 import java.math.BigDecimal
 import java.util.function.Consumer
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 
 @RunWith(SpringRunner::class)
@@ -129,7 +141,7 @@ class ProductMvc {
                 ))
 
         //TODO switch to SSE?
-        mockMvc.exchange(get("/products"))
+        mockMvc.async(get("/products"))
                 .andExpect(status().isOk)
                 .andExpect(content().json("""
                             [
@@ -147,7 +159,7 @@ class ProductMvc {
         given(productRepository.insert(product))
                 .willReturn(Mono.just(product.copy(id="123")))
 
-        mockMvc.exchange(post("/products").jsonContent("""
+        mockMvc.async(post("/products").jsonContent("""
            {
                 "price":11.34,
                 "name":"a product"
@@ -162,6 +174,7 @@ class ProductMvc {
                         "name":"a product"
                    }
                 """))
+                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON_UTF8))
 
     }
 
@@ -171,7 +184,7 @@ class ProductMvc {
         val product = Product(id = "7abc", price = 12.9.toBigDecimal(), name = "different name")
         given(productRepository.save(product)).willReturn(Mono.just(product))
 
-        mockMvc.exchange(put("/products/7abc").jsonContent("""
+        mockMvc.async(put("/products/7abc").jsonContent("""
             {
                 "price":12.9,
                 "name":"different name"
@@ -180,6 +193,7 @@ class ProductMvc {
         )
 //                .andReturn().run { mockMvc.perform(asyncDispatch(this)) }
                 .andExpect(status().isNoContent)
+//                .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON_UTF8))
     }
 
     @Test
@@ -207,51 +221,89 @@ class ValidationSpek: Spek({
     describe("product controller") {
 
         val productRepository: ProductRepository = mock(ProductRepository::class.java)
+        val mockMvc = restMockMvc(ProductController(productRepository))
 
-        val productController = ProductController(productRepository)
-        val mockMvc = restMockMvc(productController)
+        group("should reject bad product description") {
 
+            forEach(
+                    """{"price": -3, "name":""}""",
+                    """{"price": -3, "name":"", "sdfs":"sdfs"}""",
+                    """{"price": -3, "name":" "}"""
+            ) { json ->
 
-        listOf(
-//            """{"price": -3, "name":"dsd"}""", "price", "must be greater than 1",
-            """{"price": -3, "name":""}""",
-            """{"price": -3, "name":"", "sdfs":"sdfs"}""",
-            """{"price": -3, "name":" "}"""//, "name", "must not be blank"
-//            """{"price": null, "name":""}""", "name", "must not be blank",
-//            """{"price": -3, "name":""}""", "name", "must not be blank1"
-        )
-            .forEach {
+                forEach(
+                        post("/products"),
+                        put("/products/abc")
+                ) { request ->
 
-                it("should return 4xx for json '$it'") {
+                    it("should return 4xx when ${request.prettify()} with content $json") {
 
-                    mockMvc.perform(post("/products").jsonContent(it))
-                            .andExpect(status().isUnprocessableEntity)
-                            .andExpect(content().json("""
-                                [
-                                    {"field":"price","error":"must be greater than 0"},
-                                    {"field":"name","error":"must not be blank"}
-                                ]"""))
+                        mockMvc.exchange(request.jsonContent(json))
+                                .andExpect(status().isUnprocessableEntity)
+                                .andExpect(content().json("""
+                                    [
+                                        {"field":"price","error":"must be greater than 0"},
+                                        {"field":"name","error":"must not be blank"}
+                                    ]"""))
+                    }
                 }
             }
 
-        listOf(
-                """{"price": null, "name":"a"}""",
-                """{"pric""",
-                """{"price": 3, "name":null}"""
-        )
-                .forEach {
+            forEach(
+                    """{"price": null, "name":"a"}""",
+                    """{"pric""",
+                    """{"price": 3, "name":null}"""
+            ) { json ->
 
-                    it("should return 4xx for json: $it") {
+                forEach(
+                        post("/products"),
+                        put("/products/abc")
+                ) { request ->
 
-                        mockMvc.perform(post("/products").jsonContent(it))
+                    it("should return 4xx when ${request.prettify()} with content $json") {
+
+                        mockMvc.exchange(post("/products").jsonContent(json))
                                 .andExpect(status().isBadRequest)
                     }
-
                 }
+            }
+        }
 
+        group("should accept correct product") {
 
-//        """[{"field":"price","error":"must be greater than 0"},{"field":"name","error":"must not be blank"}]"""
+            val product = Product(id = null, price = BigDecimal.TEN, name = "a name");
+
+            it("should insert correct product") {
+
+                given(productRepository.insert(product)).willReturn(product.copy(id = "some id").toMono())
+
+                mockMvc.exchange(post("/products")
+                        .jsonContent("""{"price": 10, "name":"a name"}"""))
+                        .andExpect(status().isCreated)
+                        .andExpect(content().json(
+                                """{"id":"some id", "price": 10, "name":"a name"}""", true))
+            }
+
+            it("should update correct product") {
+
+                reset(productRepository)
+
+                given(productRepository.save(product.copy(id="abc"))).willReturn(product.toMono())
+
+                mockMvc.exchange(put("/products/abc")
+                            .jsonContent("""{"price": 10, "name":"a name"}"""))
+                        .andExpect(status().isNoContent)
+                        .andExpect(content().string(""))
+
+            }
+        }
+
     }
 
 })
 
+fun MockHttpServletRequestBuilder.prettify(): String {
+    return MockHttpServletRequestBuilder::class
+            .memberProperties.associate { it.name to it.also{ it.isAccessible = true }.get(this) }
+            .let { "[${it["method"]} to ${it["url"]}]" }
+}
