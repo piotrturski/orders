@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus.CREATED
+import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -19,18 +20,34 @@ import reactor.core.publisher.toMono
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.LocalDateTime
+import javax.validation.constraints.Email
+import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.Size
 
 
 data class Order(
-        var id: String? = null,
-        var email:String,
-        var products: List<Product>,
-        var date: LocalDateTime) {
+        val id: String? = null,
+        val email:String,
+        val products: List<Product>,
+        val date: LocalDateTime) {
 
     fun totalPrice() = products.map { it.price }.fold(BigDecimal.ZERO, BigDecimal::plus)
 }
 
-data class CreateOrderRequest(var email:String, var productIds: List<String>)
+data class CreateOrderRequest(
+        @field:Email val email:String,
+        @field:Size(min=1, max=100) val productIds: List<String>)
+
+//@Service
+//class OrderService(val productRepository: ProductRepository, val orderRepository: OrderRepository, val clock: Clock) {
+//
+//    fun makeOrder(@RequestBody orderRequest: CreateOrderRequest): Mono<Order> {
+//        return productRepository.findAllById(orderRequest.productIds)
+//                .buffer().toMono()
+//                .map { Order(null, orderRequest.email, it, LocalDateTime.now(clock)) }
+//                .flatMap{orderRepository.save(it)}
+//    }
+//}
 
 @RestController
 @RequestMapping("/orders")
