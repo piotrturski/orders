@@ -1,8 +1,8 @@
-package net.piotrturski.shop.order
+package net.piotrturski.shop
 
+import net.piotrturski.shop.order.ExceptionMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.matcher.AssertionMatcher
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder
+import reactor.core.publisher.Flux
 
 /**
  * performs async request. allows adding expectation for async result
@@ -62,3 +63,7 @@ fun restMockMvc(vararg controllers: Any): MockMvc {
 }
 
 fun <T> forEach(vararg element: T, body:(T) -> Unit) = element.forEach (body)
+fun <A,B>forEachCrossProduct(list1:List<A>, list2:List<B>, action:(A, B) -> Unit) =
+        list1.flatMap { a -> list2.map { Pair(a, it) } }.forEach{(a,b) -> action(a,b)}
+
+fun <T> assertThat(flux: Flux<T>) = assertThat(flux.toStream())

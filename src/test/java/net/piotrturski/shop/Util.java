@@ -1,4 +1,4 @@
-package net.piotrturski.shop.order;
+package net.piotrturski.shop;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
