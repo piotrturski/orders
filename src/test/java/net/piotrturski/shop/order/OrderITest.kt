@@ -56,8 +56,6 @@ class OrderITest {
                 .expectBodyList(Order::class.java)
                 .value<WebTestClient.ListBodySpec<Order>>{ it ->
 
-                    println(it)
-
                     assertThat(it).hasSize(1)
 
                     assertThat(it.map { it.email }).containsExactly("my@email.com")

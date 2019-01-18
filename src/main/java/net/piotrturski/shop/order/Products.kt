@@ -54,6 +54,4 @@ data class ProductBody(@field:Positive val price: BigDecimal, @field:NotBlank va
     fun toProductWithId(id: String?) = Product(id = id, price = price, name = name)
 }
 
-data class ProductContainer(val id: String, @JsonUnwrapped val body: ProductBody)
-
 interface ProductRepository: ReactiveMongoRepository<Product, String>
