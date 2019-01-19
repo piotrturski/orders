@@ -1,5 +1,6 @@
 package net.piotrturski.shop.order
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.annotations.ApiModelProperty
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
@@ -29,6 +30,8 @@ data class Order(
         val id: String? = null,
         val email:String,
         val products: List<Product>,
+        @field:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") //TODO change it globally
+//        @field:DateTimeFormat(iso =  DateTimeFormat.ISO.DATE_TIME)
         val date: LocalDateTime) {
 
     fun totalPrice() = products.map { it.price }.fold(BigDecimal.ZERO, BigDecimal::plus)

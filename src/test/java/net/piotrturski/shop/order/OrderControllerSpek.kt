@@ -38,12 +38,12 @@ class OrderControllerSpek: Spek({
         val order = Order(null, "abc@def.com", products, LocalDateTime.now(clock))
         given(orderRepository.save(order)).willReturn(Mono.just(order.copy(id="order-id")))
 
-        mockMvc.exchange(post("/orders").jsonContent("""{"email":"abc@def.com", "productIds":["123","456"]}"""))
-//        mockMvc.exchange(post("/orders").jsonContent("""{"email":"abc@def.com"}"""))
+        mockMvc.exchange(post("/orders").jsonContent(
+                """{"email":"abc@def.com", "productIds":["123","456"]}"""))
                 .andExpect(status().isCreated)
                 // TODO check date "date":"2018-05-01T14:50",
                 .andExpect(content().json("""{
-                    "id":"order-id", "email":"abc@def.com",
+                    "id":"order-id", "email":"abc@def.com", "date":"2018-05-01T14:50:00",
                     "products":[
                             {"id":"123", "price":1.23, "name":"product 1"},
                             {"id":"456", "price":12, "name":"product 2"}
