@@ -30,8 +30,7 @@ data class Order(
         val id: String? = null,
         val email:String,
         val products: List<Product>,
-        @field:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") //TODO change it globally
-//        @field:DateTimeFormat(iso =  DateTimeFormat.ISO.DATE_TIME)
+//        @field:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") //not needed anymore
         val date: LocalDateTime) {
 
     fun totalPrice() = products.map { it.price }.fold(BigDecimal.ZERO, BigDecimal::plus)
@@ -69,7 +68,7 @@ class OrderController(val productRepository: ProductRepository, val orderReposit
         ApiResponse(responseContainer = "List", response = Order::class, code = 200, message = "")
     ))
     @GetMapping
-    fun get(
+    fun get(// TODO change it globally?
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) start: LocalDateTime,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) end: LocalDateTime): Flux<Order> {
         return orderRepository.findByDateBetween(start, end)

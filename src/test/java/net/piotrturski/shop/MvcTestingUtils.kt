@@ -1,11 +1,14 @@
 package net.piotrturski.shop
 
+import com.fasterxml.jackson.databind.SerializationFeature
 import net.piotrturski.shop.order.ExceptionMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.matcher.AssertionMatcher
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.RequestBuilder
 import org.springframework.test.web.servlet.ResultActions
@@ -57,8 +60,14 @@ fun jsonPath(path: String, block: (Any) -> Unit): ResultMatcher {
 fun restMockMvc(vararg controllers: Any): MockMvc {
     return MockMvcBuilders.standaloneSetup(*controllers, ExceptionMapper())
             .alwaysDo<StandaloneMockMvcBuilder>(MockMvcResultHandlers.print())
-//            .alwaysExpect<StandaloneMockMvcBuilder>(forwardedUrl(null))
-//            .alwaysExpect<StandaloneMockMvcBuilder>(content().contentTypeCompatibleWith(APPLICATION_JSON_UTF8))
+            //from: AllEncompassingFormHttpMessageConverter.class
+            .setMessageConverters(MappingJackson2HttpMessageConverter(
+                    Jackson2ObjectMapperBuilder.json()
+                            .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                            .build()))
+//            .setMessageConverters(TestMessageConverters{
+//                    featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)})
+            .alwaysExpect<StandaloneMockMvcBuilder>(forwardedUrl(null))
             .build()
 }
 
