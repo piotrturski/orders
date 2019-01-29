@@ -27,11 +27,14 @@ production spring boot env variables are needed (like mongodb url)
 * [x] junit 5 + vintage
 * [x] jasmine like tests
 * [x] parameterized tests (maybe kotlin test)
-* [ ] java 9 modules, exports
-* [ ] check if switching to webflux works
+* [ ] [.line-through]#java 9 modules, exports#
 * [ ] springfox / swagger
 * [ ] spring doc
+* [ ] email validation in model
+* [ ] index on dates
+* [ ] check if switching to webflux works
 * [ ] check swagger for webflux
+* [ ] default spring-boot controller tests (smaller and more future-proof but slower and no spek)
 * [x] maybe java LTS
 * [ ] hystrix
 * [x] circleCI

@@ -43,7 +43,7 @@ class OrderITest {
                 Product(null, TEN, "product 2")
         )).blockLast()
 
-        val ids = productRepository.findAll().map { it.id!! }.buffer().toMono().block()!!
+        val ids = productRepository.findAll().map { it.id!! }.buffer().toMono().block()!!.toSet()
 
         productRepository.save(Product(null, 17.toBigDecimal(), "product 3")).block()
 

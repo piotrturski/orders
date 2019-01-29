@@ -67,7 +67,7 @@ class ProductControllerSpek: Spek({
 
                 it("should return 4xx when ${request.prettify()} with content $json") {
 
-                    mockMvc.exchange(post("/products").jsonContent(json))
+                    mockMvc.exchange(request.jsonContent(json))
                             .andExpect(status().isBadRequest)
                 }
             }
